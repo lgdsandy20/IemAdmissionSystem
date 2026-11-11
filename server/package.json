@@ -1,7 +1,11 @@
 {
   "name": "iem-server",
   "type": "module",
-  "scripts": { "dev": "node --watch server.js", "start": "node server.js" },
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "test": "node --test pocRules.test.js"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

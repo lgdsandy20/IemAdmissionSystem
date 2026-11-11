@@ -1,7 +1,7 @@
 // replaces client/src/pages/OfficerReview.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
+import { api, API_BASE } from '../api';
 
 type Doc = { label: string; fileName?: string; status: 'Pending' | 'Verified' | 'Rejected'; reason?: string };
 type Application = {
@@ -121,7 +121,7 @@ export default function OfficerReview() {
     // open the tab first so the popup blocker allows it, then point it at the file
     const tab = window.open('', '_blank');
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:5000/api/officer/files/' + fileName, {
+    const res = await fetch(API_BASE + '/officer/files/' + encodeURIComponent(fileName), {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
@@ -267,7 +267,7 @@ export default function OfficerReview() {
                   <span className={selected.feeStatus === 'Paid' ? 'text-green-600' : 'text-amber-600'}>
                     Fee: {selected.feeStatus}{selected.feeStatus === 'Paid' ? ' ✓' : ''}
                   </span>
-                  <span className="text-green-600">Seat availability: Available</span>
+                  <span className="text-gray-500">Seat availability: Not implemented (POC)</span>
                   <span className="text-gray-500">Marks: {selected.marks}%</span>
                 </div>
               </div>

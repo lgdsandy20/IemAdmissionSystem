@@ -195,11 +195,11 @@ export default function Dashboard() {
                               doc.status === 'Verified' ? 'text-green-600' : doc.status === 'Rejected' ? 'text-red-600' : 'text-amber-600'
                             }`}>{doc.status}</span>
                           </div>
-                          {doc.status === 'Rejected' && (
+                          {(doc.status === 'Rejected' || !doc.fileName) && app.status !== 'Approved' && app.status !== 'Rejected' && (
                             <div className="mt-2 text-xs text-red-600">
-                              Reason: {doc.reason}
+                              {doc.status === 'Rejected' ? `Reason: ${doc.reason}` : 'Document not uploaded yet'}
                               <label className="ml-3 underline cursor-pointer text-[#1b2f5e]">
-                                Re-upload
+                                {doc.fileName ? 'Re-upload' : 'Upload'}
                                 <input
                                   type="file"
                                   accept=".jpg,.jpeg,.png,.pdf"

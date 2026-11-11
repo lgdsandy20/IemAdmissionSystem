@@ -1,0 +1,16 @@
+# Generated dependencies and build outputs
+**/node_modules/
+**/dist/
+**/coverage/
+**/.vite/
+# Private runtime configuration; commit .env.example only
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+# Uploaded applicant files are private
+server/uploads/
+.DS_Store
+Thumbs.db
+.vscode/

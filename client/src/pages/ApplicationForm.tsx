@@ -20,14 +20,20 @@ export default function ApplicationForm() {
   const [files, setFiles] = useState<Record<string, File | null>>({ marksheet: null, idProof: null, photo: null });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
 
   function checkEligibility() {
-    const pct = parseFloat(marks);
-    setEligible(!isNaN(pct) && pct >= 50);
+    const pct = Number(marks);
+    // User-facing feedback mirrors the rule; server remains the source of truth.
+    setEligible(marks.trim() !== '' && Number.isFinite(pct) && pct >= 50 && pct <= 100);
   }
 
   function pickFile(key: string, file: File | undefined) {
     if (!file) {
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
+      setError('Only JPEG, PNG and PDF documents are allowed');
       return;
     }
     if (file.size > MAX_SIZE) {
@@ -51,9 +57,13 @@ export default function ApplicationForm() {
       }
     }
     setBusy(true);
+    // Preserve the newly created ID if a later upload fails: retry must not create a duplicate.
+    let savedId = createdId;
     try {
       // 1. create the application (server checks eligibility, makes the APP ID)
-      const created = await api('/applications', 'POST', { course, campus, qualification, marks });
+      const created = savedId ? { appId: savedId } : await api('/applications', 'POST', { course, campus, qualification, marks });
+      savedId = created.appId;
+      setCreatedId(created.appId);
       // 2. upload the 3 documents (index matches the server's docs array)
       for (let i = 0; i < DOCS.length; i++) {
         await apiUpload(`/applications/${created.appId}/docs/${i}`, files[DOCS[i].key] as File);
@@ -62,7 +72,7 @@ export default function ApplicationForm() {
       await api(`/applications/${created.appId}/pay`, 'POST');
       navigate('/dashboard');
     } catch (err) {
-      setError((err as Error).message);
+      setError((savedId ? 'Application saved; retry the uploads or finish from your dashboard. ' : '') + (err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -117,7 +127,7 @@ export default function ApplicationForm() {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Marks (%)</label>
                 <div className="flex gap-2">
-                  <input type="number" value={marks} onChange={e => setMarks(e.target.value)} onBlur={checkEligibility} placeholder="0–100" className={'flex-1 ' + field} />
+                  <input type="number" min="0" max="100" step="any" value={marks} onChange={e => { setMarks(e.target.value); setEligible(null); }} onBlur={checkEligibility} placeholder="0–100" className={'flex-1 ' + field} />
                   <button
                     type="button"
                     onClick={checkEligibility}

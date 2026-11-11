@@ -1,9 +1,10 @@
 // replaces client/src/api.ts
-const BASE = 'http://localhost:5000/api';
+// Override for a staging server; defaults to local POC backend.
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 export async function api(path: string, method = 'GET', body?: unknown) {
   const token = localStorage.getItem('token');
-  const res = await fetch(BASE + path, {
+  const res = await fetch(API_BASE + path, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -23,7 +24,7 @@ export async function apiUpload(path: string, file: File) {
   const token = localStorage.getItem('token');
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(BASE + path, {
+  const res = await fetch(API_BASE + path, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,
